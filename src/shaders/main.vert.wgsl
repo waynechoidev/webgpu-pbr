@@ -27,7 +27,14 @@ struct Uniforms {
   output.texCoord = input.tex;
 
   let heightScale:f32 = 0.1;
-  let height:f32 = textureSampleLevel(heightMap, mySampler, input.tex, 0).x;
+
+  // WebGPU implementation in Firefox does not allow textureSampleLevel in the Vertex Shader
+  // let height:f32 = textureSampleLevel(heightMap, mySampler, input.tex, 0).x;
+
+  let imageSize:f32 = 2048.0;
+  let texCoord: vec2<i32> = vec2<i32>(i32(input.tex.x * imageSize), i32(input.tex.y * imageSize));
+  let height: f32 = textureLoad(heightMap, texCoord, 0).x;
+
   var newPos: vec3f = input.pos + (output.normalWorld * height * heightScale);
 
 	output.posWorld = (uni.model * vec4f(newPos, 1.0)).xyz;
